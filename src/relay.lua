@@ -6,13 +6,13 @@ DB = DB or sqlite3.open_memory()
 
 DB:exec [[
   CREATE TABLE IF NOT EXISTS events (
-    id bytea PRIMARY KEY,
+    id blob PRIMARY KEY,
     kind integer NOT NULL,
-    pubkey bytea NOT NULL,
+    pubkey blob NOT NULL,
     created_at timestamp NOT NULL,
     content text NOT NULL,
     tags jsonb NOT NULL,
-    sig bytea NOT NULL
+    sig blob NOT NULL
   );
 ]]
 
@@ -100,6 +100,53 @@ Handlers.add("Query", Handlers.utils.hasMatchingTag("Action", "REQ"), function(m
 end)
 
 Handlers.add("Publish", Handlers.utils.hasMatchingTag("Action", "EVENT"), function(msg)
-  local params = json.decode(msg.Data)
+  local decoded = base64.decode(msg.Data)
+  print('Decoded:' .. decoded)
+  if decoded == nil then
+    print('Failed to decode message')
+    ao.send({
+      Target = msg.From,
+      Action = "ERROR",
+      Data = "Failed to decode message"
+    })
+    return
+  end
+  print('type of decoded:' .. type(decoded))
+  local event = json.decode(decoded)
+  print('type of event:' .. type(event))
   -- Insert event into DB
+  print('type of all the fields:' ..
+  type(event.id) ..
+  type(event.kind) ..
+  type(event.pubkey) .. type(event.created_at) .. type(event.content) .. type(event.tags) .. type(event.sig))
+
+  -- local stmt = DB:prepare [[
+  --   REPLACE INTO events (id, kind, pubkey, created_at, content, tags, sig)
+  --   VALUES (?, ?, ?, ?, ?, ?, ?);
+  -- ]]
+
+  -- if not stmt then
+  --   error("Failed to prepare publish statement" .. DB:errmsg())
+  -- end
+
+  -- -- stmt:bind_names({
+  -- --   id = fromhex(event.id),
+  -- --   kind = event.kind,
+  -- --   pubkey = fromhex(event.pubkey),
+  -- --   created_at = os.date("!%Y-%m-%d %H:%M:%S", event.created_at),
+  -- --   content = event.content,
+  -- --   tags = json.encode(event.tags),
+  -- --   sig = fromhex(event.sig)
+  -- -- })
+  -- stmt:bind(1, fromhex(event.id))
+  -- stmt:bind(2, event.kind)
+  -- stmt:bind(3, fromhex(event.pubkey))
+  -- stmt:bind(4, os.date("!%Y-%m-%d %H:%M:%S", event.created_at))
+  -- stmt:bind(5, event.content)
+  -- stmt:bind(6, json.encode(event.tags))
+  -- stmt:bind(7, fromhex(event.sig))
+
+  -- stmt:step()
+  -- stmt:reset()
+  -- print('Event published')
 end)
