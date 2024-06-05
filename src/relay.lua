@@ -25,14 +25,14 @@ end
 
 local function blob_to_hex(blob)
   return (blob.gsub(blob, ".", function(c)
-      return string.format("%02x", string.byte(c))
+    return string.format("%02x", string.byte(c))
   end))
 end
 
 local function query(stmt)
   local rows = {}
   for row in stmt:nrows() do
-    -- change blob to hexstr 
+    -- change blob to hexstr
     row.id = blob_to_hex(row.id)
     row.pubkey = blob_to_hex(row.pubkey)
     row.sig = blob_to_hex(row.sig)
@@ -59,31 +59,48 @@ Handlers.add("Query", Handlers.utils.hasMatchingTag("Action", "REQ"), function(m
   print('type of decoded:' .. type(decoded))
   local params = json.decode(decoded)
   print('type of params:' .. type(params))
-  -- Get filters from params
-
-  for _, filter in ipairs(params) do
-    print('Get events by filter:' .. filter)
-    print('ids:' .. filter.ids)
-    print('authors:' .. filter.authors)
-    print('kind:s' .. filter.kinds)
-    print('since:' .. filter.since)
-    -- print('until:'.. filter.until)
-    print('limit:' .. filter.limit)
-  end
 
   -- Query DB by filters
-  local stmt = DB:prepare [[
-    SELECT * FROM events;
-    ]]
-    if stmt == nil then
-      print('Failed to prepare query')
-      ao.send({
-        Target = msg.From,
-        Action = "ERROR",
-        Data = "Failed to prepare query"
-      })
-      return
-    end
+  local sql = "SELECT * FROM events "
+  local conditions = {}
+  -- for _, filter in ipairs(params.filters) do
+  --   if filter.ids then
+  --     local blob_ids = {}
+  --     for _, id in ipairs(filter.ids) do
+  --       table.insert(blob_ids, fromhex(id))
+  --     end
+  --     table.insert(conditions, "id IN ('" .. table.concat(blob_ids, "', '") .. "')")
+  --   end
+  --   if filter.authors then
+  --     local blob_authors = {}
+  --     for _, author in ipairs(filter.authors) do
+  --       table.insert(blob_authors, fromhex(author))
+  --     end
+  --     table.insert(conditions, "pubkey IN ('" .. table.concat(blob_authors, "', '") .. "')")
+  --   end
+  --   if filter.kinds then
+  --     table.insert(conditions, "kind IN (" .. table.concat(filter.kinds, ", ") .. ")")
+  --   end
+  --   if filter.since then
+  --     table.insert(conditions, "created_at >= " .. filter.since)
+  --   end
+  --   if filter["until"] then
+  --     table.insert(conditions, "created_at <= " .. filter["until"])
+  --   end
+  -- end
+  -- sql = sql .. "WHERE " .. table.concat(conditions, " AND ") .. "ORDER BY created_at DESC"
+
+  print('SQL:' .. sql)
+  local stmt = DB:prepare(sql)
+  if stmt == nil then
+    print('Failed to prepare query')
+    ao.send({
+      Target = msg.From,
+      Action = "ERROR",
+      Data = "Failed to prepare query"
+    })
+    return
+  end
 
   local results = query(stmt)
   print('size of results:' .. #results)
@@ -133,7 +150,7 @@ Handlers.add("Publish", Handlers.utils.hasMatchingTag("Action", "EVENT"), functi
     })
     return
   end
-  
+
   -- Insert event into DB
   local stmt = DB:prepare [[
     REPLACE INTO events (id, kind, pubkey, created_at, content, tags, sig)
