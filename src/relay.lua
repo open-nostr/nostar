@@ -59,38 +59,66 @@ Handlers.add("Query", Handlers.utils.hasMatchingTag("Action", "REQ"), function(m
   print('type of decoded:' .. type(decoded))
   local params = json.decode(decoded)
   print('type of params:' .. type(params))
+  if type(params) ~= 'table' then
+    print('Failed to decode params JSON')
+    ao.send({
+      Target = msg.From,
+      Action = "ERROR",
+      Data = "Failed to decode params JSON"
+    })
+    return
+  end
 
-  -- Query DB by filters
-  local sql = "SELECT * FROM events "
+  -- Build SQL query
+  local sql = "SELECT * FROM events"
   local conditions = {}
-  -- for _, filter in ipairs(params.filters) do
-  --   if filter.ids then
-  --     local blob_ids = {}
-  --     for _, id in ipairs(filter.ids) do
-  --       table.insert(blob_ids, fromhex(id))
-  --     end
-  --     table.insert(conditions, "id IN ('" .. table.concat(blob_ids, "', '") .. "')")
-  --   end
-  --   if filter.authors then
-  --     local blob_authors = {}
-  --     for _, author in ipairs(filter.authors) do
-  --       table.insert(blob_authors, fromhex(author))
-  --     end
-  --     table.insert(conditions, "pubkey IN ('" .. table.concat(blob_authors, "', '") .. "')")
-  --   end
-  --   if filter.kinds then
-  --     table.insert(conditions, "kind IN (" .. table.concat(filter.kinds, ", ") .. ")")
-  --   end
-  --   if filter.since then
-  --     table.insert(conditions, "created_at >= " .. filter.since)
-  --   end
-  --   if filter["until"] then
-  --     table.insert(conditions, "created_at <= " .. filter["until"])
-  --   end
-  -- end
-  -- sql = sql .. "WHERE " .. table.concat(conditions, " AND ") .. "ORDER BY created_at DESC"
-
+  for _, filter in ipairs(params) do
+    if filter.ids then
+      local blob_ids = {}
+      for _, id in ipairs(filter.ids) do
+        table.insert(blob_ids, fromhex(id))
+      end
+      if #blob_ids > 0 then
+        table.insert(conditions, "id IN ('" .. table.concat(blob_ids, "', '") .. "')")
+      end
+    end
+    if filter.authors then
+      local blob_authors = {}
+      for _, author in ipairs(filter.authors) do
+        table.insert(blob_authors, fromhex(author))
+      end
+      if #blob_authors > 0 then
+        table.insert(conditions, "pubkey IN ('" .. table.concat(blob_authors, "', '") .. "')")
+      end
+    end
+    print(type(filter.kinds))
+    if filter.kinds then
+      local kinds_list = {}
+      for _, kind in ipairs(filter.kinds) do
+        table.insert(kinds_list, tostring(kind))
+      end
+      if #kinds_list > 0 then
+        local kinds_str = table.concat(kinds_list, ", ")
+        table.insert(conditions, "kind IN (" .. kinds_str .. ")")
+      end
+    end
+    if filter.since then
+      table.insert(conditions, "created_at >= " .. filter.since)
+    end
+    if filter["until"] then
+      table.insert(conditions, "created_at <= " .. filter["until"])
+    end
+  end
+  if #conditions > 0 then
+    print('Conditions:' .. table.concat(conditions, " AND "))
+    sql = sql .. " WHERE " .. table.concat(conditions, " AND ")
+  else
+    print("No conditions to apply in query.")
+  end
+  sql = sql .. " ORDER BY created_at DESC;"
   print('SQL:' .. sql)
+
+  -- Execute query
   local stmt = DB:prepare(sql)
   if stmt == nil then
     print('Failed to prepare query')
@@ -114,7 +142,6 @@ Handlers.add("Query", Handlers.utils.hasMatchingTag("Action", "REQ"), function(m
   local encoded = base64.encode(response)
   ao.send({
     Target = msg.From,
-    Action = "EVENT",
     Data = encoded
   })
   ao.send({
