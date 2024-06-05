@@ -9,16 +9,34 @@ DB:exec [[
     id blob PRIMARY KEY,
     kind integer NOT NULL,
     pubkey blob NOT NULL,
-    created_at timestamp NOT NULL,
+    created_at integer NOT NULL,
     content text NOT NULL,
     tags jsonb NOT NULL,
     sig blob NOT NULL
   );
 ]]
 
+local function fromhex(hexstr)
+  local str = hexstr:gsub("..", function(cc)
+    return string.char(tonumber(cc, 16))
+  end)
+  return str
+end
+
+local function blob_to_hex(blob)
+  return (blob.gsub(blob, ".", function(c)
+      return string.format("%02x", string.byte(c))
+  end))
+end
+
 local function query(stmt)
   local rows = {}
   for row in stmt:nrows() do
+    -- change blob to hexstr 
+    row.id = blob_to_hex(row.id)
+    row.pubkey = blob_to_hex(row.pubkey)
+    row.sig = blob_to_hex(row.sig)
+    row.tags = json.decode(row.tags)
     table.insert(rows, row)
   end
   stmt:reset()
@@ -42,16 +60,6 @@ Handlers.add("Query", Handlers.utils.hasMatchingTag("Action", "REQ"), function(m
   local params = json.decode(decoded)
   print('type of params:' .. type(params))
   -- Get filters from params
-  -- parmas JSON Schema:
-  -- [{
-  --   "ids": <a list of event ids>,
-  --   "authors": <a list of lowercase pubkeys, the pubkey of an event must be one of these>,
-  --   "kinds": <a list of a kind numbers>,
-  --   "#<single-letter (a-zA-Z)>": <a list of tag values, for #e — a list of event ids, for #p — a list of pubkeys, etc.>,
-  --   "since": <an integer unix timestamp in seconds, events must be newer than this to pass>,
-  --   "until": <an integer unix timestamp in seconds, events must be older than this to pass>,
-  --   "limit": <maximum number of events relays SHOULD return in the initial query>
-  -- }, {filters2}, ...]
 
   for _, filter in ipairs(params) do
     print('Get events by filter:' .. filter)
@@ -66,16 +74,17 @@ Handlers.add("Query", Handlers.utils.hasMatchingTag("Action", "REQ"), function(m
   -- Query DB by filters
   local stmt = DB:prepare [[
     SELECT * FROM events;
-  ]]
-  if stmt == nil then
-    print('Failed to prepare query')
-    ao.send({
-      Target = msg.From,
-      Action = "ERROR",
-      Data = "Failed to prepare query"
-    })
-    return
-  end
+    ]]
+    if stmt == nil then
+      print('Failed to prepare query')
+      ao.send({
+        Target = msg.From,
+        Action = "ERROR",
+        Data = "Failed to prepare query"
+      })
+      return
+    end
+
   local results = query(stmt)
   print('size of results:' .. #results)
   for _, row in ipairs(results) do
@@ -100,6 +109,7 @@ Handlers.add("Query", Handlers.utils.hasMatchingTag("Action", "REQ"), function(m
 end)
 
 Handlers.add("Publish", Handlers.utils.hasMatchingTag("Action", "EVENT"), function(msg)
+  -- preprocess message
   local decoded = base64.decode(msg.Data)
   print('Decoded:' .. decoded)
   if decoded == nil then
@@ -114,39 +124,46 @@ Handlers.add("Publish", Handlers.utils.hasMatchingTag("Action", "EVENT"), functi
   print('type of decoded:' .. type(decoded))
   local event = json.decode(decoded)
   print('type of event:' .. type(event))
+  if type(event) ~= 'table' then
+    print('Failed to decode event JSON')
+    ao.send({
+      Target = msg.From,
+      Action = "ERROR",
+      Data = "Failed to decode event JSON"
+    })
+    return
+  end
+  
   -- Insert event into DB
-  print('type of all the fields:' ..
-  type(event.id) ..
-  type(event.kind) ..
-  type(event.pubkey) .. type(event.created_at) .. type(event.content) .. type(event.tags) .. type(event.sig))
+  local stmt = DB:prepare [[
+    REPLACE INTO events (id, kind, pubkey, created_at, content, tags, sig)
+    VALUES (:id, :kind, :pubkey, :created_at, :content, :tags, :sig);
+  ]]
 
-  -- local stmt = DB:prepare [[
-  --   REPLACE INTO events (id, kind, pubkey, created_at, content, tags, sig)
-  --   VALUES (?, ?, ?, ?, ?, ?, ?);
-  -- ]]
+  if not stmt then
+    error("Failed to prepare publish statement" .. DB:errmsg())
+    ao.send({
+      Target = msg.From,
+      Action = "ERROR",
+      Data = "Failed to publish statement"
+    })
+  end
 
-  -- if not stmt then
-  --   error("Failed to prepare publish statement" .. DB:errmsg())
-  -- end
+  stmt:bind_names({
+    id = fromhex(event.id),
+    kind = event.kind,
+    pubkey = fromhex(event.pubkey),
+    created_at = event.created_at,
+    content = event.content,
+    tags = json.encode(event.tags),
+    sig = fromhex(event.sig)
+  })
 
-  -- -- stmt:bind_names({
-  -- --   id = fromhex(event.id),
-  -- --   kind = event.kind,
-  -- --   pubkey = fromhex(event.pubkey),
-  -- --   created_at = os.date("!%Y-%m-%d %H:%M:%S", event.created_at),
-  -- --   content = event.content,
-  -- --   tags = json.encode(event.tags),
-  -- --   sig = fromhex(event.sig)
-  -- -- })
-  -- stmt:bind(1, fromhex(event.id))
-  -- stmt:bind(2, event.kind)
-  -- stmt:bind(3, fromhex(event.pubkey))
-  -- stmt:bind(4, os.date("!%Y-%m-%d %H:%M:%S", event.created_at))
-  -- stmt:bind(5, event.content)
-  -- stmt:bind(6, json.encode(event.tags))
-  -- stmt:bind(7, fromhex(event.sig))
-
-  -- stmt:step()
-  -- stmt:reset()
-  -- print('Event published')
+  stmt:step()
+  stmt:reset()
+  print('Event published')
+  ao.send({
+    Target = msg.From,
+    Data = "['OK', " .. event.id .. "]"
+  })
 end)
