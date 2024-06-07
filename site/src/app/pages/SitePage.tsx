@@ -3,8 +3,9 @@ import { NavLink, Outlet } from 'react-router-dom';
 import NavBar from '../elements/NavBar';
 import {
   BsAward, BsBell, BsBookmark, BsChatText, BsController, BsHouse,
-  BsPeopleFill, BsPerson, BsReplyFill, BsSend, BsSendFill
+  BsPeopleFill, BsPerson, BsReplyFill, BsSearch, BsSend, BsSendFill
 } from 'react-icons/bs';
+import { GiOstrich } from 'react-icons/gi';
 import {
   formatBalance,
   getDataFromAO, getDefaultProcess,
@@ -161,27 +162,21 @@ class SitePage extends React.Component<{}, SitePageState> {
         </NavLink>
 
         <NavLink className='site-page-icon-button' to='/relayTest'>
-          <BsHouse size={ICON_SIZE} />
+          <GiOstrich size={ICON_SIZE} />
         </NavLink>
 
-        <NavLink className='site-page-icon-button' to='/story'>
-          <AiOutlineFire size={ICON_SIZE} />
+        <NavLink className='site-page-icon-button' to='/query'>
+          <BsSearch size={ICON_SIZE} />
         </NavLink>
+
+        {/* <NavLink className='site-page-icon-button' to='/story'>
+          <AiOutlineFire size={ICON_SIZE} />
+        </NavLink> */}
 
         <div className='site-page-icon-button' onClick={this.onOpen}>
           <RiQuillPenLine size={35} />
         </div>
 
-        <NavLink className='site-page-icon-button' to='/notifications'>
-          <BsBell size={ICON_SIZE} />
-        </NavLink>
-
-        <div
-          className='site-page-icon-button'
-          onClick={() => this.setState({ openMenu: true })}
-        >
-          <CgMoreO size={ICON_SIZE} />
-        </div>
       </div>
     )
   }
@@ -264,9 +259,9 @@ class SitePage extends React.Component<{}, SitePageState> {
 
         {this.renderToobar()}
 
-        {this.state.openMenu &&
+        {/* {this.state.openMenu &&
           this.renderPopupMenu()
-        }
+        } */}
 
         <PostModal open={this.state.open} onClose={this.onClose} />
       </div>
