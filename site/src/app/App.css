@@ -158,6 +158,7 @@ a {
 .app-navbar {
   position: fixed;
   top: 80px;
+  width: 180px;
 }
 
 .app-content {

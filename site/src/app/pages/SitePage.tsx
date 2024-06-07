@@ -160,6 +160,10 @@ class SitePage extends React.Component<{}, SitePageState> {
           <BsHouse size={ICON_SIZE} />
         </NavLink>
 
+        <NavLink className='site-page-icon-button' to='/relayTest'>
+          <BsHouse size={ICON_SIZE} />
+        </NavLink>
+
         <NavLink className='site-page-icon-button' to='/story'>
           <AiOutlineFire size={ICON_SIZE} />
         </NavLink>

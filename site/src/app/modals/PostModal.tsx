@@ -5,15 +5,19 @@ import './Modal.css'
 import './PostModal.css'
 import MessageModal from './MessageModal';
 import SharedQuillEditor from '../elements/SharedQuillEditor';
-import { AO_STORY, AO_TWITTER, STORY_INCOME, TIP_CONN, TIP_IMG } from '../util/consts';
+import { AO_STORY, AO_TWITTER, NOSTR_TEST, STORY_INCOME, TIP_CONN, TIP_IMG } from '../util/consts';
 import {
   checkContent, getWalletAddress, timeOfNow, uuid, messageToAO,
-  numberWithCommas, transferToken, getDefaultProcess
+  numberWithCommas, transferToken, getDefaultProcess,
+  signNostrEvent
 } from '../util/util';
 import { MdOutlineToken } from 'react-icons/md';
 import { Server } from '../../server/server';
 import { AiOutlineFire } from 'react-icons/ai';
 import QuestionModal from './QuestionModal';
+import { BaseEvent } from '../util/nostr';
+import { Event } from 'nostr-tools';
+import { Base64 } from 'js-base64';
 
 declare var window: any;
 
@@ -82,6 +86,35 @@ class PostModal extends React.Component<PostModalProps, PostModalState> {
     this.setState({ question: 'Publish a story will spend 100 AOT-Test token.' })
   }
 
+  async onPostNostr() {
+    let result = checkContent(this.quillRef, this.wordCount);
+    if (result) {
+      this.setState({ alert: result });
+      return;
+    }
+    let post = this.quillRef.root.innerHTML;
+    const event = new BaseEvent({
+      kind: 1,
+      tags:[],
+      content:post,
+      created_at: timeOfNow(),
+    } as Event);
+    const signedEvent = await signNostrEvent(event);
+    const serializedEvent = JSON.stringify(signedEvent);
+    console.log("serializedEvent:", serializedEvent);
+    if (!serializedEvent) {
+      this.setState({ alert: 'Failed to sign the event.' });
+      return;
+    }
+    const base64Event = Base64.encode(serializedEvent);
+    let response = await messageToAO(NOSTR_TEST, base64Event, 'EVENT');
+    if (response) {
+      this.setState({ message: '' });
+      this.props.onClose(serializedEvent);
+    }
+    else
+      this.setState({ message: '', alert: TIP_IMG });
+  }
   async onPost() {
     let result = checkContent(this.quillRef, this.wordCount);
     if (result) {
@@ -222,6 +255,16 @@ class PostModal extends React.Component<PostModalProps, PostModalState> {
                 </select>
               }
 
+              {this.props.isStory
+                ?
+                <div className="app-icon-button fire-color" onClick={() => this.tipTransfer()}>
+                  <AiOutlineFire size={20} />New Story
+                </div>
+                :
+                <div className="app-icon-button" onClick={() => this.onPostNostr()}>
+                  <BsSend size={20} />Post4Nostr
+                </div>
+              }
               {this.props.isStory
                 ?
                 <div className="app-icon-button fire-color" onClick={() => this.tipTransfer()}>

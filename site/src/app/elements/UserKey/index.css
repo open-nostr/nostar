@@ -1,0 +1,12 @@
+.user-key {
+  white-space: wrap;
+  overflow-wrap: anywhere;
+}
+.user-key-title:hover {
+  text-decoration: underline;
+}
+.user-key-title {
+  color: blue;
+  cursor: pointer;
+  margin-right: 4px;
+}

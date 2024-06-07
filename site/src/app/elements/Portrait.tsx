@@ -3,6 +3,7 @@ import './Portrait.css';
 import { publish, subscribe } from '../util/event';
 import { AOT_TEST, AO_STORY, AO_TWITTER, LUA } from '../util/consts';
 import {
+  connectNos2x,
   connectWallet, evaluate, getDefaultProcess, getProfile, getTokenBalance,
   getWalletAddress, isLoggedIn, messageToAO, randomAvatar, shortAddr, shortStr, spawnProcess, timeOfNow
 } from '../util/util';
@@ -12,6 +13,7 @@ import QuestionModal from '../modals/QuestionModal';
 import { BsToggleOn, BsWallet2 } from 'react-icons/bs';
 import * as Othent from "@othent/kms";
 import MessageModal from '../modals/MessageModal';
+import UserKey from './UserKey';
 
 import {
   connect,
@@ -31,6 +33,7 @@ interface PortraitState {
   address: string;
   question: string;
   message: string;
+  nostrPublicKey: string;
 }
 
 class Portrait extends React.Component<PortraitProps, PortraitState> {
@@ -43,6 +46,7 @@ class Portrait extends React.Component<PortraitProps, PortraitState> {
       address: '',
       question: '',
       message: '',
+      nostrPublicKey: '',
     };
 
     this.onQuestionYes = this.onQuestionYes.bind(this);
@@ -93,6 +97,12 @@ class Portrait extends React.Component<PortraitProps, PortraitState> {
       this.afterConnected(address);
     }
   }
+  async connect2nos2x() {
+    let nostrPublicKey = await connectNos2x();
+    if (nostrPublicKey) {
+      this.afterNostrConnected(nostrPublicKey);
+    }
+  }
 
   async afterConnected(address: string, othent?: any) {
     Server.service.setIsLoggedIn(address);
@@ -126,6 +136,10 @@ class Portrait extends React.Component<PortraitProps, PortraitState> {
     let bal_aot = await getTokenBalance(AOT_TEST, process);
     console.log("bal_aot:", bal_aot)
     Server.service.setBalanceOfAOT(bal_aot);
+  }
+  async afterNostrConnected(address: string) {
+    Server.service.setNostrPublicKey(address);
+    this.setState({ nostrPublicKey: address });
   }
 
   async register(address: string, othent?: any) {
@@ -188,6 +202,7 @@ class Portrait extends React.Component<PortraitProps, PortraitState> {
     let address = this.state.address;
     let avatar = this.state.avatar;
     let shortAddress = shortAddr(address, 4);
+    let nostrPublicKey = this.state.nostrPublicKey;
 
     return (
       <div>
@@ -231,7 +246,22 @@ class Portrait extends React.Component<PortraitProps, PortraitState> {
             </div>
           </div>
         }
+        <UserKey />
+        {/* {nostrPublicKey
+          ?
+          <text className='site-page-nostr-pubkey'>
+            nostrPublicKey: {nostrPublicKey}
+          </text>
+          :
+          <div>
 
+            <div className='portrait-conn-pc'>
+            <div className="app-icon-button connect" onClick={() => this.connect2nos2x()}>
+                <BsWallet2 size={20} />Nostr
+              </div>
+            </div>
+          </div>
+        } */}
         <Tooltip id="my-tooltip" />
         <MessageModal message={this.state.message} />
         <QuestionModal message={this.state.question} onYes={this.onQuestionYes} onNo={this.onQuestionNo} />

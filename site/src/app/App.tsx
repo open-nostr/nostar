@@ -13,6 +13,8 @@ import BookmarksPage from './pages/BookmarksPage';
 import ProfilePage from './pages/ProfilePage';
 import FollowPage from './pages/FollowPage';
 import NotiPage from './pages/NotiPage';
+import RelayTestPage from './pages/RelayTestPage';
+import QueryPage from './pages/QueryPage';
 
 class App extends React.Component<{}, {}> {
   constructor(props = {}) {
@@ -28,9 +30,11 @@ class App extends React.Component<{}, {}> {
         <Routes>
           <Route path='/' element={<SitePage />}>
             <Route index element={<HomePage />} />
+            <Route path='/query' element={<QueryPage />} />
             <Route path='/post/:id' element={<ActivityPostPage type='post' />} />
             <Route path='/story/:id' element={<ActivityPostPage type='story' />} />
             <Route path="/story" element={<StoryPage />} />
+            <Route path="/relayTest" element={<RelayTestPage />} />
             <Route path="/token" element={<TokenPage />} />
             <Route path="/games" element={<GamesPage />} />
             <Route path="/chat" element={<ChatPage />} />

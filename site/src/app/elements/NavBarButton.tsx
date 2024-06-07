@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { publish } from '../util/event';
 import './NavBar.css';
-import { BsAward, BsBell, BsBookmark, BsChatText, BsController, BsHouse, BsPerson } from 'react-icons/bs';
+import { BsAward, BsBell, BsBookmark, BsChatText, BsController, BsHouse, BsPerson, BsSearch } from 'react-icons/bs';
 import { ICON_SIZE } from '../util/consts';
 import { AiOutlineFire } from 'react-icons/ai';
 import { Server } from '../../server/server';
@@ -65,6 +65,8 @@ class NavBarButton extends React.Component<NavBarButtonProps, NavBarButtonState>
   renderIcon() {
     if (this.props.text == 'Home')
       return <BsHouse size={ICON_SIZE} />
+    else if (this.props.text == 'RelayTest')
+      return <BsHouse size={ICON_SIZE} />
     else if (this.props.text == 'Story')
       return <AiOutlineFire size={ICON_SIZE} />
     else if (this.props.text == 'Games')
@@ -79,6 +81,8 @@ class NavBarButton extends React.Component<NavBarButtonProps, NavBarButtonState>
       return <BsChatText size={ICON_SIZE} />
     else if (this.props.text == 'Profile')
       return <BsPerson size={ICON_SIZE} />
+    else if (this.props.text == 'Query')
+      return <BsSearch size={ICON_SIZE} />
   }
 
   render() {

@@ -95,10 +95,12 @@
   background-color: var(--body-color);
   width: 85px;
   margin-right: 10px;
+  padding: 0;
+  color: black;
 }
 
 .modal-close-button {
-  position: absolute; 
+  position: absolute;
   right: 0;
   top: 0;
   background-color: transparent;

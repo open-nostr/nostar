@@ -1,9 +1,13 @@
 import { createDataItemSigner, dryrun, message, spawn } from "@permaweb/aoconnect/browser";
-import { AO_TWITTER, ARWEAVE_GATEWAY, MODULE, SCHEDULER } from "./consts";
+import { AO_TWITTER, ARWEAVE_GATEWAY, MODULE, NOSTR_PRIVATE_KEY, NOSTR_TEST, SCHEDULER } from "./consts";
 import { Server } from "../../server/server";
 import { createAvatar } from '@dicebear/core';
 import { micah } from '@dicebear/collection';
 import * as Othent from "@othent/kms";
+import { Event, Filter } from "nostr-tools";
+import { Base64 } from "js-base64";
+import {finalizeEvent} from "nostr-tools";
+import { hexToBytes } from '@noble/hashes/utils'
 
 declare var window: any;
 
@@ -185,7 +189,9 @@ export function convertHashTag(str: string): any {
  */
 export function convertUrlsToLinks(text: string) {
   const urlRegex = /(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+  const imageRegex = /\.(jpeg|jpg|gif|png|svg)$/i;
 
+  const hashTagRegex = /#\w+(-\w+)*/g;
   // match all of <a> tag content
   const hrefRegex = /<a\s+[^>]*?href\s*=\s*(['"])(.*?)\1/g;
   const hrefs = text.match(hrefRegex);
@@ -194,11 +200,16 @@ export function convertUrlsToLinks(text: string) {
   const convertedText = text.replace(urlRegex, (url) => {
     if (hrefs && hrefs.includes(`<a href="${url}"`))
       return url;
+    else if (imageRegex.test(url))
+      return `<img src="${url}" alt="${url}" class="ql-editor-image"/>`;
     else
       return `<a href=${url} target="_blank" id="url-${url}">${url}</a>`;
   });
+  const convertedText2 = convertedText.replace(hashTagRegex, (hashtag) => {
+    return `<a href=https://snort.social/t/${hashtag.split('#')[1]} target="_blank" id="url-${hashtag}">${hashtag}</a>`;
+  });
 
-  return convertedText;
+  return convertedText2;
 
   // return text.replace(urlRegex, function(url) {
   //   const href = url.startsWith('http') ? url : `http://${url}`;
@@ -471,7 +482,8 @@ export async function messageToAO(process: string, data: any, action: string) {
 export async function getDataFromAO(
   process: string,
   action: string,
-  data?: any
+  data?: any,
+  isNostr=false
 ) {
 
   let start = performance.now();
@@ -481,19 +493,28 @@ export async function getDataFromAO(
   try {
     result = await dryrun({
       process,
-      data: JSON.stringify(data),
+      data: isNostr ? Base64.encode(JSON.stringify(data)) : JSON.stringify(data),
       tags: [{ name: 'Action', value: action }]
     });
   } catch (error) {
     console.log('getDataFromAO --> ERR:', error)
     return '';
   }
+  if (isNostr) {
 
-  // console.log('action', action);
-  // console.log('result', result);
+    console.log('process', process);
+    console.log('action', action);
+    console.log('data', data);
+    console.log('result', result);
+  }
+  if (result.Messages.length == 0) {
+    return []
+  }
 
   let resp = result.Messages[0].Data;
-
+  if (isNostr) {
+    resp = Base64.decode(resp);
+  }
   let end = performance.now();
   // console.log(`<== [getDataFromAO] [${Math.round(end - start)} ms]`);
 
@@ -522,6 +543,32 @@ export async function connectWallet() {
   }
 
   return true;
+}
+
+export async function connectNos2x() {
+  let nostrPublicKey;
+  try {
+    // connect to the nos2x browser extension
+    nostrPublicKey = await window.nostr.getPublicKey(
+    );
+  } catch (error) {
+    alert('You should install nos2x browser extension.');
+    return '';
+  }
+
+  return nostrPublicKey;
+}
+
+export async function signNostrEvent(event: Event) {
+  try {
+    let key = localStorage.getItem(NOSTR_PRIVATE_KEY)
+    let backToBytes = hexToBytes(key)
+    let signedEvent = finalizeEvent(event, backToBytes)
+    return signedEvent;
+  } catch (error) {
+    alert('unable to sign event');
+    return null;
+  }
 }
 
 export async function getWalletAddress() {
@@ -697,4 +744,12 @@ export function trimDecimal(num: number, digits: number) {
   }
   
   return `${intPart}.${fractPart}`;
+}
+
+export async function fetchEvents (filters: Filter[]) {
+  let process = NOSTR_TEST;
+
+  let notis = await getDataFromAO(process, 'REQ', filters, true);
+
+  return notis;
 }

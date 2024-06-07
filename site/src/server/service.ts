@@ -14,6 +14,7 @@ export class Service {
   protected balanceOfTRUNK:number;
   protected balanceOfWAR:number;
   protected balanceOf0rbit:number;
+  protected nostrPublicKey:string;
 
   constructor() {
     this.profiles = [];
@@ -133,4 +134,11 @@ export class Service {
     return this.balanceOf0rbit;
   }
   
+  public setNostrPublicKey(nostrPublicKey:string) {
+    this.nostrPublicKey = nostrPublicKey;
+  }
+
+  public getNostrPublicKey() {
+    return this.nostrPublicKey;
+  }
 }

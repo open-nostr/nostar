@@ -11,6 +11,7 @@ export const WAR = "xU9zFkq3X2ZQ6olwNVvr1vUWIjc3kXTWr7xKQD6dh10";
 export const ORBT = "BUhZLMwQ6yZHguLtJYA5lLUa9LQzLXMXRfaq9FVcPJc";
 export const AOT_TEST = "UabERwDSwechOsHg9M1N6qTk2O7EXPf63qABDTAj_Vs";
 export const CHATROOM = "F__i_YGIUOGw43zyqLY9dEKNNEhB_uTqzL9tOTWJ-KA";
+export const NOSTR_TEST = "NUCxLGw2-SnQ4qRDFa9dhj4ba3VuISz0gqmQ4CP0BEo"
 export const TIP_IMG = "Sending the message is encountering a problem. Is there a picture in the post? Size just up to 200 kb for now.";
 export const ICON_SIZE = 28;
 export const PAGE_SIZE = "10";
@@ -147,3 +148,5 @@ export const LUA =
     end
   )
 `;
+
+export const NOSTR_PRIVATE_KEY = 'NOSTR_PRIVATE_KEY'

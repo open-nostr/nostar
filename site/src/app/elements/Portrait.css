@@ -28,6 +28,12 @@
   color: gray;
   /* margin-top: 3px; */
 }
+.site-page-nostr-pubkey {
+  display: inline-block;
+  width: 150px;
+  word-wrap: break-word; 
+  overflow-wrap: break-word; 
+}
 
 .connect {
   width: 110px;
