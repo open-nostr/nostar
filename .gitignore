@@ -47,7 +47,6 @@ luac.out
 # Node artifact files
 node_modules/
 dist/
-build/
 
 # Compiled Java class files
 *.class
