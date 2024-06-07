@@ -1,4 +1,6 @@
 ![Image Description](https://image.nostr.build/4bd8a4f41dc7aace829c15b2a7652118507f3b64a9a93ff8cd226ebcbc87b15d.png)
+For the demo website can check: https://open-nostr.github.io/nostarwebsite/#/relayTest
+
 Nostar, a combination of "Nostr" and "AR(AO)," may not be the best name, but it represents a significant evolution in our protocol.
 
 Our team has been working on the Nostr protocol for about a year. We've discovered that the client-relay model can sometimes be unstable, leading to data synchronization issues. For a long time, we've been contemplating how to integrate a consensus layer into Nostr.
