@@ -1,0 +1,18 @@
+.relay-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #d9fdd3; /* 修改为绿色背景 */
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .relay-item input {
+    width: 80%;
+  }
+  
+  .relay-item button {
+    margin-left: 10px;
+  }
+  

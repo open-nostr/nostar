@@ -15,6 +15,7 @@ export class Service {
   protected balanceOfWAR:number;
   protected balanceOf0rbit:number;
   protected nostrPublicKey:string;
+  protected nostrRelayList:string[];
 
   constructor() {
     this.profiles = [];
@@ -140,5 +141,13 @@ export class Service {
 
   public getNostrPublicKey() {
     return this.nostrPublicKey;
+  }
+
+  public setNostrRelayList(nostrRelayList:string[]) {
+    this.nostrRelayList = nostrRelayList;
+  }
+
+  public getNostrRelayList() {
+    return this.nostrRelayList;
   }
 }
