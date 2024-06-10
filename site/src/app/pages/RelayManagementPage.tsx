@@ -7,7 +7,7 @@ const RelayManagementPage = () => {
 
     const [relays, setRelays] = useState<string[]>([]);
     const [newRelay, setNewRelay] = useState<string>('');
-    const predefinedRelays = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://eden.nostr.land', 'wss://relay.current.fyi', 'wss://nostr.wine'];
+    const predefinedRelays = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.current.fyi', 'wss://nostr.wine', 'wss://relayable.org'];
 
     useEffect(() => {
         const fetchRelays = () => {
