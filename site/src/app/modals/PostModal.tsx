@@ -16,7 +16,7 @@ import { Server } from '../../server/server';
 import { AiOutlineFire } from 'react-icons/ai';
 import QuestionModal from './QuestionModal';
 import { BaseEvent } from '../util/nostr';
-import { Event } from 'nostr-tools';
+import { Event, SimplePool } from 'nostr-tools';
 import { Base64 } from 'js-base64';
 
 declare var window: any;
@@ -92,7 +92,7 @@ class PostModal extends React.Component<PostModalProps, PostModalState> {
       this.setState({ alert: result });
       return;
     }
-    let post = this.quillRef.root.innerHTML;
+    let post = this.quillRef.root.textContent;
     const event = new BaseEvent({
       kind: 1,
       tags:[],
@@ -106,6 +106,37 @@ class PostModal extends React.Component<PostModalProps, PostModalState> {
       this.setState({ alert: 'Failed to sign the event.' });
       return;
     }
+    const relayList = Server.service.getNostrRelayList();
+    if (relayList.length > 0) {
+      this.setState({ message: 'Posting...' });
+      try {
+        const pool = new SimplePool();
+        const publishPromises = relayList.map(async relay => {
+          try {
+            await pool.publish([relay], event);
+            return relay;
+          } catch {
+            return null;
+          }
+        });
+      
+        const results = await Promise.all(publishPromises);
+        const successfulRelays = results.filter(result => result !== null);
+      
+        if (successfulRelays.length > 0) {
+          console.log('Published to at least one relay:', successfulRelays);
+        } else {
+          this.setState({ message: '', alert: 'Failed to publish the event to relays, please try again.' });
+          return;
+        }
+      } catch (e) {
+        this.setState({ message: '', alert: 'Failed to publish the event to relays, please try again.' });
+        return;
+      }
+  } else {
+    this.setState({ alert: 'No relay is connected.' });
+    return;
+  }
     const base64Event = Base64.encode(serializedEvent);
     let response = await messageToAO(NOSTR_TEST, base64Event, 'EVENT');
     if (response) {
