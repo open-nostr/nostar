@@ -7,6 +7,7 @@ import { ICON_SIZE } from '../util/consts';
 import { AiOutlineFire } from 'react-icons/ai';
 import { Server } from '../../server/server';
 import { GiOstrich } from 'react-icons/gi';
+import { SiRelay } from "react-icons/si";
 
 interface NavBarButtonProps {
   // icon:string,
@@ -66,6 +67,8 @@ class NavBarButton extends React.Component<NavBarButtonProps, NavBarButtonState>
   renderIcon() {
     if (this.props.text == 'Home')
       return <BsHouse size={ICON_SIZE} />
+    else if (this.props.text == 'Relay')
+      return <SiRelay size={ICON_SIZE}/>
     else if (this.props.text == 'RelayTest')
       return <GiOstrich size={ICON_SIZE} />
     else if (this.props.text == 'Story')

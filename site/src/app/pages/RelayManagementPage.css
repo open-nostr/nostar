@@ -1,0 +1,28 @@
+.relay-management-page {
+    display: flex;
+    flex-direction: column;
+    max-width: var(--page-max-width);
+    padding-left: 30px;
+    padding-bottom: 30px;
+    row-gap: 10px;
+    line-height: 30px;
+  }
+  
+  .relay-management-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .relay-management-page-title {
+    font-size: 23px;
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 650px) {
+    .relay-management-page {
+      padding: 10px;
+      padding-bottom: 60px;
+    }
+  }
+  

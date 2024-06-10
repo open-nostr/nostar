@@ -15,6 +15,7 @@ import FollowPage from './pages/FollowPage';
 import NotiPage from './pages/NotiPage';
 import RelayTestPage from './pages/RelayTestPage';
 import QueryPage from './pages/QueryPage';
+import RelayManagementPage from './pages/RelayManagementPage';
 
 class App extends React.Component<{}, {}> {
   constructor(props = {}) {
@@ -34,6 +35,7 @@ class App extends React.Component<{}, {}> {
             <Route path='/post/:id' element={<ActivityPostPage type='post' />} />
             <Route path='/story/:id' element={<ActivityPostPage type='story' />} />
             <Route path="/story" element={<StoryPage />} />
+            <Route path="/relay" element={<RelayManagementPage />} />
             <Route path="/relayTest" element={<RelayTestPage />} />
             <Route path="/token" element={<TokenPage />} />
             <Route path="/games" element={<GamesPage />} />

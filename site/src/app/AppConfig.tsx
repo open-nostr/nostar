@@ -10,6 +10,12 @@ export class AppConfig {
       loggedIn: false
     },
     {
+      text: 'Relay',
+      icon: 'relay',
+      to: '/relay',
+      loggedIn: false
+    },
+    {
       text: 'RelayTest',
       icon: 'home',
       to: '/relayTest',
