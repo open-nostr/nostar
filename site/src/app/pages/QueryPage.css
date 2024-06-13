@@ -1,0 +1,74 @@
+.query-page {
+    display: flex;
+  flex-direction: column;
+  max-width: var(--page-max-width);
+  padding-left: 30px;
+  padding-bottom: 30px;
+  line-height: 30px;
+  }
+  
+  .query-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .query-page-title {
+    font-size: 23px;
+    margin-bottom: 20px;
+  }
+  
+  .filter-section {
+    margin-bottom: 10px;
+  }
+  
+  .filter-title {
+    font-size: 18px;
+    margin-bottom: 5px;
+  }
+  
+  .filter-select,
+  input[type="date"],
+  textarea {
+    outline: none;
+    border: 1px solid #ccc;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 5px;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+  
+  .filter-input {
+    display: flex;
+    gap: 32px;
+  }
+  
+  .filter-trash-icon {
+    cursor: pointer;
+    margin-left: 8px;
+  }
+  
+  .query-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .query-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .query-results {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  

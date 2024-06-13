@@ -41,7 +41,7 @@ class RelayTestPage extends React.Component<{}, RelayTestPageState> {
     // if (!Server.service.getIsLoggedIn()) return;
 
     this.getRelayTests();
-    window.addEventListener('scroll', this.atBottom);
+    // window.addEventListener('scroll', this.atBottom);
   }
 
   componentWillUnmount(): void {
