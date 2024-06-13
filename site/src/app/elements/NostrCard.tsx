@@ -103,11 +103,11 @@ class NostrCard extends React.Component<NostrCardProps, NostrCardState> {
   }
 
   goProfilePage(e: any, id: string) {
-    window.open("https://snort.social/e/" + id );
+    window.open("https://njump.me/" + id );
   }
 
   goPostPage(id: string) {
-    window.open("https://snort.social/e/" + id );
+    window.open("https://njump.me/" + id );
   }
 
   getClassName(kind: number) {

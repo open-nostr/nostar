@@ -206,7 +206,7 @@ export function convertUrlsToLinks(text: string) {
       return `<a href=${url} target="_blank" id="url-${url}">${url}</a>`;
   });
   const convertedText2 = convertedText.replace(hashTagRegex, (hashtag) => {
-    return `<a href=https://snort.social/t/${hashtag.split('#')[1]} target="_blank" id="url-${hashtag}">${hashtag}</a>`;
+    return `<a href=https://coracle.social/topics/${hashtag.split('#')[1]} target="_blank" id="url-${hashtag}">${hashtag}</a>`;
   });
 
   return convertedText2;
