@@ -51,7 +51,7 @@ const RelayManagementPage = () => {
       return (
         <div className="relay-management-page">
           <div className="relay-management-page-header">
-            <h2 className="relay-management-page-title">Relay Management</h2>
+            <div className="relay-management-page-title">Relay Management</div>
           </div>
           <div className="relay-list">
             {predefinedRelays.map((relay, index) => (
