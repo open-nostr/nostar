@@ -1,5 +1,5 @@
 ![Image Description](https://image.nostr.build/4bd8a4f41dc7aace829c15b2a7652118507f3b64a9a93ff8cd226ebcbc87b15d.png)
-For the demo website can check: https://open-nostr.github.io/nostarwebsite/#/relayTest
+For the demo website can check: https://open-nostr.github.io/nostar/#/relayTest
 
 Nostar, a combination of "Nostr" and "AR(AO)," may not be the best name, but it represents a significant evolution in our protocol.
 
