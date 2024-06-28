@@ -12,7 +12,7 @@ const RelayManagementPage = () => {
     useEffect(() => {
         const fetchRelays = () => {
           const savedRelays = Server.service.getNostrRelayList();
-          setRelays(savedRelays || []);
+          setRelays(savedRelays || predefinedRelays);
           console.log('Fetched relays:', savedRelays);
         };
     
